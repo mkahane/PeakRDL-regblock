@@ -10,7 +10,7 @@ from .dereferencer import Dereferencer
 from .readback_mux import ReadbackMux
 from .signals import InferredSignal
 
-from .cpuif.apb4 import APB4_Cpuif
+from .cpuif.axi4lite import AXI4LITE_Cpuif
 from .hwif.struct import StructHwif
 
 class RegblockExporter:
@@ -49,7 +49,7 @@ class RegblockExporter:
         if isinstance(node, RootNode):
             node = node.top
 
-        cpuif_cls = kwargs.pop("cpuif_cls", APB4_Cpuif)
+        cpuif_cls = kwargs.pop("cpuif_cls", AXI4LITE_Cpuif)
         hwif_cls = kwargs.pop("hwif_cls", StructHwif)
         module_name = kwargs.pop("module_name", node.inst_name)
         package_name = kwargs.pop("package_name", module_name + "_pkg")
