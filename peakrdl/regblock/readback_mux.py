@@ -1,7 +1,9 @@
 import re
+import math
 from typing import TYPE_CHECKING, List
 
-from systemrdl.node import Node, AddressableNode, RegNode
+from systemrdl.node import Node, AddressableNode, RegNode, FieldNode, RegfileNode
+
 
 
 if TYPE_CHECKING:
@@ -14,13 +16,64 @@ class ReadbackMux:
 
         self._indent_level = 0
 
+    #TODO: This needs to handle fields that overlap addresses?
+    def gen_mux_map(self, node, addr_width, data_width, addr_to_reg_map):
 
-    def get_implementation(self) -> str:
+        for child in node.children(unroll=True):
+
+            if isinstance(child, RegNode):
+                if(child.has_sw_readable):
+                    mux_address = (child.absolute_address * 8) >> (int)(math.log2(data_width))
+                    if mux_address in addr_to_reg_map:
+                        addr_to_reg_map[mux_address].append(child)
+                    else:
+                        newlist = []
+                        newlist.append(child)
+                        addr_to_reg_map[mux_address] = newlist
+
+                   
+            elif isinstance(child, RegfileNode):
+                self.gen_mux_map(child, addr_width, data_width, addr_to_reg_map)
+
+
+    def get_implementation(self, addr_width, data_width) -> str:
+        lines = []
+        lines.append("//Readback Mux")
+        lines.append("always_comb begin")
+        lines.append("case (slv_reg_rd_addr)")
         # TODO: Count the number of readable registers
+        readable_regs = 0;
+        addr_to_reg_map = {}
+
+        print(f"addr width: {addr_width} data width: {data_width}")
+
+        self.gen_mux_map(self.top_node, addr_width, data_width, addr_to_reg_map)
+
+        #is this guaranteed to be ordered
+        for key in addr_to_reg_map:
+            li = addr_to_reg_map[key]
+            print(f"mux_address: {key}")
+
+            for elem in li:
+                print(f"\tregister: {elem.inst_name} at absolute_address: {elem.absolute_address}")
+                lines.append(f"'d{key}: begin")
+                for field in elem.fields():
+                    if(field.is_sw_readable):
+                        hier =  field.get_path()
+                        tokens = hier.split(".")
+                        tokens[0] = "storage"
+                        storage_elem = ".".join(tokens)
+
+                        lines.append(f"\treg_data_out[{field.high}:{field.low}] = {storage_elem}")
+
+
+
+
         # TODO: Emit the declaration for the readback array
         # TODO: Always comb block to assign & mask all elements
         # TODO: Separate always_comb block to OR reduce down
-        return "//TODO"
+
+        return "\n".join(lines)
 
 
     #---------------------------------------------------------------------------

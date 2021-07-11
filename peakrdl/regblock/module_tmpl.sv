@@ -73,7 +73,7 @@ module {{module_name}} #(
     logic readback_done;
     logic [DATA_WIDTH-1:0] readback_data;
 
-    {{readback_mux.get_implementation()|indent}}
+    {{readback_mux.get_implementation(addr_width, data_width)|indent}}
 
     {%- call utils.AlwaysFF(cpuif_reset) %}
         if({{cpuif_reset.activehigh_identifier}}) begin

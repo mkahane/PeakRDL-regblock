@@ -10,18 +10,18 @@ addrmap top {
         reg {
             field {
                 hw=r; sw=rw;
-            } abc[16:2] = 0;
+            } abc1[16:2] = 0;
             field {
                 hw=r; sw=rw;
-            } def[4] = 0;
+            } def1[4] = 0;
         } aaa[4];
         reg {
             field {
                 hw=r; sw=rw;
-            } abc = 0;
+            } abc2 = 0;
             field {
                 hw=r; sw=rw;
-            } def = 0;
+            } def2 = 0;
         } bbb;
     } asdf[20];
 };

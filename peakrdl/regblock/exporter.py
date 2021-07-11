@@ -69,7 +69,7 @@ class RegblockExporter:
         cpuif = cpuif_cls(
             self,
             cpuif_reset=cpuif_reset, # TODO:
-            data_width=32, # TODO:
+            data_width=64, # TODO:
             addr_width=32 # TODO:
         )
 
@@ -87,7 +87,7 @@ class RegblockExporter:
         # Build Jinja template context
         context = {
             "module_name": module_name,
-            "data_width": 32, # TODO:
+            "data_width": 64, # TODO:
             "addr_width": 32, # TODO:
             "reset_signals": reset_signals,
             "cpuif_reset": cpuif_reset,
