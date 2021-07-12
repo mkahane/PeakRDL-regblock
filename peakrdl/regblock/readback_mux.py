@@ -16,6 +16,10 @@ class ReadbackMux:
 
         self._indent_level = 0
 
+    @property
+    def _indent(self) -> str:
+        return "    " * self._indent_level
+
     #TODO: This needs to handle fields that overlap addresses?
     def gen_mux_map(self, node, addr_width, data_width, addr_to_reg_map):
 
@@ -38,40 +42,41 @@ class ReadbackMux:
 
     def get_implementation(self, addr_width, data_width) -> str:
         lines = []
-        lines.append("//Readback Mux")
-        lines.append("always_comb begin")
-        lines.append("case (slv_reg_rd_addr)")
+        lines.append(f"{self._indent}//Readback Mux")
+        lines.append(f"{self._indent}always_comb begin")
+        self._indent_level += 1
+        lines.append(f"{self._indent}case (slv_reg_rd_addr)")
         # TODO: Count the number of readable registers
         readable_regs = 0;
         addr_to_reg_map = {}
 
-        print(f"addr width: {addr_width} data width: {data_width}")
 
         self.gen_mux_map(self.top_node, addr_width, data_width, addr_to_reg_map)
 
         #is this guaranteed to be ordered
         for key in addr_to_reg_map:
             li = addr_to_reg_map[key]
-            print(f"mux_address: {key}")
-
             for elem in li:
-                print(f"\tregister: {elem.inst_name} at absolute_address: {elem.absolute_address}")
-                lines.append(f"'d{key}: begin")
+                self._indent_level += 1
+                lines.append(f"{self._indent}'d{key}: begin")
                 for field in elem.fields():
                     if(field.is_sw_readable):
                         hier =  field.get_path()
                         tokens = hier.split(".")
                         tokens[0] = "storage"
                         storage_elem = ".".join(tokens)
+                        self._indent_level += 1
+                        lines.append(f"{self._indent}reg_data_out[{field.high}:{field.low}] = {storage_elem}")
+                        self._indent_level -= 1
 
-                        lines.append(f"\treg_data_out[{field.high}:{field.low}] = {storage_elem}")
+                self._indent_level -= 1
 
+        lines.append(f"{self._indent}endcase")
+        self._indent_level -= 1
+        lines.append(f"{self._indent}end // always_comb")
 
+        lines.append(f"\n\n")
 
-
-        # TODO: Emit the declaration for the readback array
-        # TODO: Always comb block to assign & mask all elements
-        # TODO: Separate always_comb block to OR reduce down
 
         return "\n".join(lines)
 

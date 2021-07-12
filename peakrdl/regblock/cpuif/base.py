@@ -27,7 +27,6 @@ class CpuifBase:
             "addr_width": self.addr_width,
         }
 
-        print(self.template_path)
 
         template = self.exporter.jj_env.get_template(self.template_path)
         return template.render(context)

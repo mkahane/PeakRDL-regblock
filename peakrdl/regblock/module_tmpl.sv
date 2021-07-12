@@ -75,6 +75,8 @@ module {{module_name}} #(
 
     {{readback_mux.get_implementation(addr_width, data_width)|indent}}
 
+    
+
     {%- call utils.AlwaysFF(cpuif_reset) %}
         if({{cpuif_reset.activehigh_identifier}}) begin
             cpuif_rd_ack <= '0;
