@@ -63,7 +63,7 @@ module {{module_name}} #(
     //--------------------------------------------------------------------------
     {{field_logic.get_storage_struct()|indent}}
 
-    // TODO: Field next-state logic, and output port signal assignment (aka output mapping layer)
+    //Field next-state logic, and output port signal assignment (aka output mapping layer)
     {{field_logic.get_implementation()|indent}}
 
     //--------------------------------------------------------------------------
