@@ -63,7 +63,10 @@ class ReadbackMux:
                     if(field.is_sw_readable):
                         hier =  field.get_path()
                         tokens = hier.split(".")
-                        tokens[0] = "storage"
+                        if(field.implements_storage):
+                            tokens[0] = "storage"
+                        else :
+                            tokens[0] = "hwif_in"
                         storage_elem = ".".join(tokens)
                         self._indent_level += 1
                         lines.append(f"{self._indent}reg_data_out[{field.high}:{field.low}] = {storage_elem}")
