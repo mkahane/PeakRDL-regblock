@@ -64,11 +64,15 @@ class RegblockExporter:
 
         # TODO: derive this from somewhere
         cpuif_reset = InferredSignal("rst")
+        cpuif_wr_valid = InferredSignal("WVALID")
+        cpuif_rd_data = InferredSignal("RDATA")
         reset_signals = [cpuif_reset]
 
         cpuif = cpuif_cls(
             self,
             cpuif_reset=cpuif_reset, # TODO:
+            cpuif_wr_valid=cpuif_wr_valid, # TODO:
+            cpuif_rd_data=cpuif_rd_data, # TODO:
             data_width=64, # TODO:
             addr_width=32 # TODO:
         )
@@ -91,6 +95,8 @@ class RegblockExporter:
             "addr_width": 32, # TODO:
             "reset_signals": reset_signals,
             "cpuif_reset": cpuif_reset,
+            "cpuif_wr_valid": cpuif_wr_valid,
+            "cpuif_rd_data": cpuif_rd_data,
             "user_signals": [], # TODO:
             "interrupts": [], # TODO:
             "cpuif": cpuif,

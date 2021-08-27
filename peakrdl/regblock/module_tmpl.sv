@@ -64,7 +64,23 @@ module {{module_name}} #(
     {{field_logic.get_storage_struct()|indent}}
 
     //Field next-state logic, and output port signal assignment (aka output mapping layer)
-    {{field_logic.get_implementation()|indent}}
+    {%- call utils.AlwaysFF(cpuif_reset) %}
+    if({{cpuif_reset.activehigh_identifier}}) begin
+        {{field_logic.get_storage_reset_implementation()|indent(8)}}
+    end else begin
+        {{field_logic.get_storage_next_state_implementation()|indent(8)}}
+    end
+    {%- endcall %}
+
+    always_comb begin
+        {{field_logic.assign_default_nextstate()|indent(8)}}
+        if({{cpuif.signal(cpuif_wr_valid.identifier)}}) begin
+            case (slv_reg_wr_addr)
+            {{field_logic.get_write_demux(addr_width, data_width, cpuif.signal("wrdata"))|indent(12)}}
+            endcase
+        end
+    end
+
 
     //--------------------------------------------------------------------------
     // Readback mux
@@ -73,8 +89,7 @@ module {{module_name}} #(
     logic readback_done;
     logic [DATA_WIDTH-1:0] readback_data;
 
-    {{readback_mux.get_implementation(addr_width, data_width)|indent}}
-
+    {{readback_mux.get_implementation(addr_width, data_width, cpuif.signal("rddata"))|indent}}
     
 
     {%- call utils.AlwaysFF(cpuif_reset) %}

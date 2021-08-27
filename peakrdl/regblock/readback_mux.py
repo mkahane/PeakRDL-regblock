@@ -40,7 +40,7 @@ class ReadbackMux:
                 self.gen_mux_map(child, addr_width, data_width, addr_to_reg_map)
 
 
-    def get_implementation(self, addr_width, data_width) -> str:
+    def get_implementation(self, addr_width, data_width, rd_bus_name) -> str:
         lines = []
         lines.append(f"{self._indent}//Readback Mux")
         lines.append(f"{self._indent}always_comb begin")
@@ -69,7 +69,7 @@ class ReadbackMux:
                             tokens[0] = "hwif_in"
                         storage_elem = ".".join(tokens)
                         self._indent_level += 1
-                        lines.append(f"{self._indent}reg_data_out[{field.high}:{field.low}] = {storage_elem}")
+                        lines.append(f"{self._indent}{rd_bus_name}[{field.high}:{field.low}] = {storage_elem}")
                         self._indent_level -= 1
 
                 self._indent_level -= 1

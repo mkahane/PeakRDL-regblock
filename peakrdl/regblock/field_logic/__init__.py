@@ -1,3 +1,4 @@
+import math
 from typing import TYPE_CHECKING, List
 
 from systemrdl.node import Node, AddressableNode, RegNode, FieldNode, RegfileNode
@@ -18,12 +19,27 @@ class FieldLogic:
 
         # Only declare the storage struct if it exists
         if lines:
-            lines.append(f"{self._indent}field_storage_t field_storage;")
+            lines.append(f"{self._indent}field_storage_t field_storage, field_storage_d;")
         return "\n".join(lines)
 
-    def get_implementation(self) -> str:
+    def get_storage_reset_implementation(self) -> str:
         lines = []
-        self._do_storage(lines, self.top_node)
+        self.emit_reset_values(lines, self.top_node)
+        return "\n".join(lines)
+
+    def get_storage_next_state_implementation(self) -> str:
+        lines = []
+        self.emit_storage(lines, self.top_node)
+        return "\n".join(lines)
+
+    def assign_default_nextstate(self) -> str:
+        lines = []
+        self.emit_default_nextstate(lines, self.top_node)
+        return "\n".join(lines)
+
+    def get_write_demux(self, addr_width, data_width, cpuif_wr_data) -> str:
+        lines = []
+        self.emit_case_demux(lines, self.top_node, addr_width, data_width, cpuif_wr_data)
         return "\n".join(lines)
 
 
@@ -83,7 +99,7 @@ class FieldLogic:
                         tokens = hier.split(".")
                         tokens[0] = "storage"
                         storage_elem = ".".join(tokens)
-                        lines.append(f"{self._indent}{storage_elem} <= {field.get_property('reset')}" )
+                        lines.append(f"{self._indent}{storage_elem} <= {field.get_property('reset')};" )
 
             elif isinstance(child, RegfileNode):
                 self.emit_reset_values(lines, child)
@@ -95,37 +111,80 @@ class FieldLogic:
                 for field in child.fields():
                     if(field.implements_storage):
                         hier = field.get_path()
-                        tokens = hier.split(".")
-                        d_elem_tokens = tokens
-                        tokens[0] = "storage"
-                        d_elem_tokens[0] = "storage_d"
-                        storage_elem = ".".join(tokens)
-                        d_elem = ".".join(d_elem_tokens)
+                        storage_tokens = hier.split(".")
+                        d_tokens = hier.split(".")
+                        storage_tokens[0] = "storage"
+                        d_tokens[0] = "storage_d"
+                        storage_elem = ".".join(storage_tokens)
+                        d_elem = ".".join(d_tokens)
                         lines.append(f"{self._indent}{storage_elem} <= {d_elem}" )
             elif isinstance(child, RegfileNode):
                 self.emit_storage(lines, child)
 
+    def emit_default_nextstate(self, lines:List[str], node:AddressableNode):
+        for child in node.children(unroll=True):
+            if isinstance(child, RegNode):
+                for field in child.fields():
+                    if(field.implements_storage):
+                        hier = field.get_path()
+                        storage_tokens = hier.split(".")
+                        d_tokens = hier.split(".")
+                        storage_tokens[0] = "storage"
+                        d_tokens[0] = "storage_d"
+                        storage_elem = ".".join(storage_tokens)
+                        d_elem = ".".join(d_tokens)
+                        lines.append(f"{self._indent}{d_elem} = {storage_elem}" )
+            elif isinstance(child, RegfileNode):
+                self.emit_default_nextstate(lines, child)
 
 
-    def _do_storage(self, lines:List[str], node:AddressableNode):
+    def gen_mux_map(self, node, addr_width, data_width, addr_to_reg_map):
 
-        lines.append(f"{self._indent}always_ff @(posedge clk) begin")
-        self._indent_level += 1;
-        lines.append(f"{self._indent}if(reset) begin")
-        self._indent_level += 1;
+        for child in node.children(unroll=True):
 
-        self.emit_reset_values(lines, node)
+            if isinstance(child, RegNode):
+                if(child.has_sw_readable):
+                    mux_address = (child.absolute_address * 8) >> (int)(math.log2(data_width))
+                    if mux_address in addr_to_reg_map:
+                        addr_to_reg_map[mux_address].append(child)
+                    else:
+                        newlist = []
+                        newlist.append(child)
+                        addr_to_reg_map[mux_address] = newlist
 
-        self._indent_level -= 1;
-        lines.append(f"{self._indent}end else begin //reset")
-        self._indent_level += 1;
 
-        self.emit_storage(lines, node)
+            elif isinstance(child, RegfileNode):
+                self.gen_mux_map(child, addr_width, data_width, addr_to_reg_map)
 
-        self._indent_level -= 1;
-        lines.append(f"{self._indent}end // else reset")
-        self._indent_level -= 1;
-        lines.append(f"{self._indent}end // always_ff")
+
+    def emit_case_demux(self, lines:List[str], node:AddressableNode, addr_width, data_width, cpuif_wr_data):
+        addr_to_reg_map = {}
+        self.gen_mux_map(node, addr_width, data_width, addr_to_reg_map)
+
+        #is this guaranteed to be ordered
+        for key in addr_to_reg_map:
+            li = addr_to_reg_map[key]
+            for elem in li:
+                self._indent_level += 1
+                lines.append(f"{self._indent}'d{key}:")
+                for field in elem.fields():
+                    if(field.is_sw_writable and field.implements_storage):
+                        hier =  field.get_path()
+                        tokens = hier.split(".")
+                        tokens[0] = "storage_d"
+                        storage_elem = ".".join(tokens)
+
+                        self._indent_level += 1
+                        lines.append(f"{self._indent}{storage_elem} = {cpuif_wr_data}[{field.high}:{field.low}]")
+                        self._indent_level -= 1
+
+                self._indent_level -= 1
+
+
+
+
+
+
 
     def _do_reg_struct(self, lines:List[str], node:RegNode) -> None:
 
