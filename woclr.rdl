@@ -1,0 +1,9 @@
+
+addrmap top {
+
+    reg {
+        field {
+            singlepulse;
+        } matt_field = 0;
+    } matt_reg;
+};

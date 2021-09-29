@@ -6,6 +6,12 @@ addrmap top {
         } y = 0;
     } whee[2][8];
 
+    reg {
+        field {
+            hw=w; sw=rw;
+        } matt_field;
+    } matt_reg;
+
     regfile {
         reg {
             field {
@@ -17,7 +23,7 @@ addrmap top {
         } aaa[4];
         reg {
             field {
-                hw=r; sw=rw;
+                hw=w; sw=r;
             } abc2 = 0;
             field {
                 hw=r; sw=rw;

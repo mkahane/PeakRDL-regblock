@@ -41,10 +41,10 @@ class ReadbackMux:
                     if(field.is_sw_readable):
                         hier =  field.get_path()
                         tokens = hier.split(".")
-                        if(field.implements_storage):
-                            tokens[0] = "storage"
-                        else :
+                        if(not (field.implements_storage) or field.get_property("singlepulse")):
                             tokens[0] = "hwif_in"
+                        else :
+                            tokens[0] = "storage"
                         storage_elem = ".".join(tokens)
                         self._indent_level += 1
                         lines.append(f"{self._indent}{rd_bus_name}[{field.high}:{field.low}] = {storage_elem}")

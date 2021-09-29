@@ -42,6 +42,11 @@ class FieldLogic:
         self.emit_case_demux(lines, self.top_node, addr_to_reg_map, cpuif_wr_data)
         return "\n".join(lines)
 
+    def clear_pulses(self, addr_to_reg_map) -> str:
+        lines = []
+        self.emit_clear_pulses(lines, self.top_node, addr_to_reg_map)
+        return "\n".join(lines)
+
 
 
     #---------------------------------------------------------------------------
@@ -133,7 +138,11 @@ class FieldLogic:
                         d_tokens[0] = "storage_d"
                         storage_elem = ".".join(storage_tokens)
                         d_elem = ".".join(d_tokens)
-                        lines.append(f"{self._indent}{d_elem} = {storage_elem}" )
+
+                        if(field.get_property("singlepulse")):
+                            lines.append(f"{self._indent}{d_elem} = '0 //clear after pulse" )
+                        else:
+                            lines.append(f"{self._indent}{d_elem} = {storage_elem} //retain state" )
             elif isinstance(child, RegfileNode):
                 self.emit_default_nextstate(lines, child)
 
@@ -161,8 +170,6 @@ class FieldLogic:
                         self._indent_level -= 1
 
                 self._indent_level -= 1
-
-
 
 
 
