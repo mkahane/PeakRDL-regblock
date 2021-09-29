@@ -5,6 +5,7 @@ import jinja2 as jj
 from systemrdl.node import Node, RootNode
 
 from .addr_decode import AddressDecode
+from .addr_regmap import AddrRegmap
 from .field_logic import FieldLogic
 from .dereferencer import Dereferencer
 from .readback_mux import ReadbackMux
@@ -54,6 +55,10 @@ class RegblockExporter:
         module_name = kwargs.pop("module_name", node.inst_name)
         package_name = kwargs.pop("package_name", module_name + "_pkg")
 
+        #TODO
+        addr_width = 32
+        data_width = 32
+
         # Check for stray kwargs
         if kwargs:
             raise TypeError("got an unexpected keyword argument '%s'" % list(kwargs.keys())[0])
@@ -67,6 +72,8 @@ class RegblockExporter:
         cpuif_wr_valid = InferredSignal("WVALID")
         cpuif_rd_data = InferredSignal("RDATA")
         reset_signals = [cpuif_reset]
+
+
 
         cpuif = cpuif_cls(
             self,
@@ -87,6 +94,12 @@ class RegblockExporter:
         field_logic = FieldLogic(self, node)
         readback_mux = ReadbackMux(self, node)
         dereferencer = Dereferencer(self, hwif, field_logic, node)
+        addr_regmap = AddrRegmap(self, node)
+
+        addr_to_reg_map = {}
+        addr_regmap.gen_mux_map(node, addr_width, data_width, addr_to_reg_map)
+
+
 
         # Build Jinja template context
         context = {
@@ -104,6 +117,7 @@ class RegblockExporter:
             "address_decode": address_decode,
             "field_logic": field_logic,
             "readback_mux": readback_mux,
+            "addr_to_reg_map" :addr_to_reg_map
         }
 
         # Write out design

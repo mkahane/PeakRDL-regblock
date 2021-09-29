@@ -37,9 +37,9 @@ class FieldLogic:
         self.emit_default_nextstate(lines, self.top_node)
         return "\n".join(lines)
 
-    def get_write_demux(self, addr_width, data_width, cpuif_wr_data) -> str:
+    def get_write_demux(self, addr_to_reg_map, cpuif_wr_data) -> str:
         lines = []
-        self.emit_case_demux(lines, self.top_node, addr_width, data_width, cpuif_wr_data)
+        self.emit_case_demux(lines, self.top_node, addr_to_reg_map, cpuif_wr_data)
         return "\n".join(lines)
 
 
@@ -138,28 +138,10 @@ class FieldLogic:
                 self.emit_default_nextstate(lines, child)
 
 
-    def gen_mux_map(self, node, addr_width, data_width, addr_to_reg_map):
-
-        for child in node.children(unroll=True):
-
-            if isinstance(child, RegNode):
-                if(child.has_sw_readable):
-                    mux_address = (child.absolute_address * 8) >> (int)(math.log2(data_width))
-                    if mux_address in addr_to_reg_map:
-                        addr_to_reg_map[mux_address].append(child)
-                    else:
-                        newlist = []
-                        newlist.append(child)
-                        addr_to_reg_map[mux_address] = newlist
 
 
-            elif isinstance(child, RegfileNode):
-                self.gen_mux_map(child, addr_width, data_width, addr_to_reg_map)
 
-
-    def emit_case_demux(self, lines:List[str], node:AddressableNode, addr_width, data_width, cpuif_wr_data):
-        addr_to_reg_map = {}
-        self.gen_mux_map(node, addr_width, data_width, addr_to_reg_map)
+    def emit_case_demux(self, lines:List[str], node:AddressableNode, addr_to_reg_map, cpuif_wr_data):
 
         #is this guaranteed to be ordered
         for key in addr_to_reg_map:
