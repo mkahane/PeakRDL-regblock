@@ -156,6 +156,9 @@ class FieldLogic:
         for key in addr_to_reg_map:
             li = addr_to_reg_map[key]
             for elem in li:
+                if not elem.has_sw_writable:
+                    continue
+
                 self._indent_level += 1
                 lines.append(f"{self._indent}'d{key}:")
                 for field in elem.fields():
