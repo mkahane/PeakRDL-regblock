@@ -45,14 +45,14 @@ class RegblockExporter:
         )
 
 
-    def export(self, node:Node, output_package_path:str,output_module_path:str, **kwargs):
+    def export(self, node:Node, output_relpath, **kwargs):
         # If it is the root node, skip to top addrmap
         if isinstance(node, RootNode):
             node = node.top
 
         cpuif_cls = kwargs.pop("cpuif_cls", AXI4LITE_Cpuif)
         hwif_cls = kwargs.pop("hwif_cls", StructHwif)
-        module_name = kwargs.pop("module_name", node.inst_name)
+        module_name = kwargs.pop("module_name", node.inst_name + "_reg")
         package_name = kwargs.pop("package_name", module_name + "_pkg")
 
         #TODO
@@ -80,8 +80,8 @@ class RegblockExporter:
             cpuif_reset=cpuif_reset, # TODO:
             cpuif_wr_valid=cpuif_wr_valid, # TODO:
             cpuif_rd_data=cpuif_rd_data, # TODO:
-            data_width=64, # TODO:
-            addr_width=32 # TODO:
+            data_width=data_width,
+            addr_width=addr_width
         )
 
         hwif = hwif_cls(
@@ -121,11 +121,12 @@ class RegblockExporter:
             "addr_to_reg_map" :addr_to_reg_map
         }
 
+        output_package_path = output_relpath + package_name + ".sv"
         template = self.jj_env.get_template("pkg_tmpl.sv")
         stream = template.stream(context)
         stream.dump(output_package_path)
 
-        # Write out design
+        output_module_path = output_relpath + module_name + ".sv"
         template = self.jj_env.get_template("module_tmpl.sv")
         stream = template.stream(context)
         stream.dump(output_module_path)
