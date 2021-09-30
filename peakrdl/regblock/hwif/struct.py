@@ -70,7 +70,7 @@ class StructHwif(HwifBase):
         )
         if is_input:
             return f'{base}_in_t'
-        return f'{base}__out_t'
+        return f'{base}_out_t'
 
     def _do_struct_addressable(self, lines:list, node:AddressableNode, is_input:bool = True) -> bool:
 
