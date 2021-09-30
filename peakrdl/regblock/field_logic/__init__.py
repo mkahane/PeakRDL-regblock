@@ -19,7 +19,7 @@ class FieldLogic:
 
         # Only declare the storage struct if it exists
         if lines:
-            lines.append(f"{self._indent}field_storage_t field_storage, field_storage_d;")
+            lines.append(f"{self._indent}field_storage_t storage_d;")
         return "\n".join(lines)
 
     def get_storage_reset_implementation(self) -> str:
@@ -102,7 +102,7 @@ class FieldLogic:
                     if(field.implements_storage):
                         hier = field.get_path()
                         tokens = hier.split(".")
-                        tokens[0] = "storage"
+                        tokens[0] = "hwif_out"
                         storage_elem = ".".join(tokens)
                         lines.append(f"{self._indent}{storage_elem} <= {field.get_property('reset')};" )
 
@@ -118,7 +118,7 @@ class FieldLogic:
                         hier = field.get_path()
                         storage_tokens = hier.split(".")
                         d_tokens = hier.split(".")
-                        storage_tokens[0] = "storage"
+                        storage_tokens[0] = "hwif_out"
                         d_tokens[0] = "storage_d"
                         storage_elem = ".".join(storage_tokens)
                         d_elem = ".".join(d_tokens)
@@ -134,7 +134,7 @@ class FieldLogic:
                         hier = field.get_path()
                         storage_tokens = hier.split(".")
                         d_tokens = hier.split(".")
-                        storage_tokens[0] = "storage"
+                        storage_tokens[0] = "hwif_out"
                         d_tokens[0] = "storage_d"
                         storage_elem = ".".join(storage_tokens)
                         d_elem = ".".join(d_tokens)

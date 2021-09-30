@@ -45,7 +45,7 @@ class RegblockExporter:
         )
 
 
-    def export(self, node:Node, output_path:str, **kwargs):
+    def export(self, node:Node, output_package_path:str,output_module_path:str, **kwargs):
         # If it is the root node, skip to top addrmap
         if isinstance(node, RootNode):
             node = node.top
@@ -104,6 +104,7 @@ class RegblockExporter:
         # Build Jinja template context
         context = {
             "module_name": module_name,
+            "package_name": package_name,
             "data_width": 64, # TODO:
             "addr_width": 32, # TODO:
             "reset_signals": reset_signals,
@@ -120,7 +121,13 @@ class RegblockExporter:
             "addr_to_reg_map" :addr_to_reg_map
         }
 
+        template = self.jj_env.get_template("pkg_tmpl.sv")
+        stream = template.stream(context)
+        stream.dump(output_package_path)
+
         # Write out design
         template = self.jj_env.get_template("module_tmpl.sv")
         stream = template.stream(context)
-        stream.dump(output_path)
+        stream.dump(output_module_path)
+
+

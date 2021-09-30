@@ -1,6 +1,8 @@
 {%- import "utils_tmpl.sv" as utils with context -%}
 
-{{hwif.get_package_declaration()}}
+
+import {{package_name}}::*;
+
 
 module {{module_name}} #(
         // TODO: pipeline parameters
@@ -73,6 +75,7 @@ module {{module_name}} #(
     {%- endcall %}
 
     always_comb begin
+        //Next State Logic
         {{field_logic.assign_default_nextstate()|indent(8)}}
         if({{cpuif.signal(cpuif_wr_valid.identifier)}}) begin
             case (slv_reg_wr_addr)
