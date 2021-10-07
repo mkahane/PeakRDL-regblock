@@ -5,7 +5,7 @@ class AXI4LITE_Cpuif(CpuifBase):
 
     @property
     def port_declaration(self) -> str:
-        return "axi4lite_intf.slave s_axi4lite"
+        return "axi4lite_if.slave s_axi4lite"
 
     def signal(self, name:str) -> str:
         return "s_axi4lite." + name
