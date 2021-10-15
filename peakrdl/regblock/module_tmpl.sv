@@ -44,7 +44,6 @@ module {{module_name}} (
 
     {{cpuif.get_implementation()|indent}}
 
-    /*
     //--------------------------------------------------------------------------
     // Address Decode
     //--------------------------------------------------------------------------
@@ -73,6 +72,7 @@ module {{module_name}} (
     end
     {%- endcall %}
 
+    /*
     always_comb begin
         Next State Logic
         {{field_logic.assign_default_nextstate()|indent(8)}}

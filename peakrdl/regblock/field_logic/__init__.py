@@ -103,6 +103,7 @@ class FieldLogic:
                         hier = field.get_path()
                         tokens = hier.split(".")
                         tokens[0] = "hwif_out"
+                        tokens.append("value")
                         storage_elem = ".".join(tokens)
                         lines.append(f"{self._indent}{storage_elem} <= {field.get_property('reset')};" )
 
@@ -120,9 +121,10 @@ class FieldLogic:
                         d_tokens = hier.split(".")
                         storage_tokens[0] = "hwif_out"
                         d_tokens[0] = "storage_d"
+                        storage_tokens.append("value")
                         storage_elem = ".".join(storage_tokens)
                         d_elem = ".".join(d_tokens)
-                        lines.append(f"{self._indent}{storage_elem} <= {d_elem}" )
+                        lines.append(f"{self._indent}{storage_elem} <= {d_elem};" )
             elif isinstance(child, RegfileNode):
                 self.emit_storage(lines, child)
 
