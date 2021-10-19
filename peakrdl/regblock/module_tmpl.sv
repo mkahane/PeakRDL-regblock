@@ -72,13 +72,12 @@ module {{module_name}} (
     end
     {%- endcall %}
 
-    /*
     always_comb begin
-        Next State Logic
+        //Next State Logic
         {{field_logic.assign_default_nextstate()|indent(8)}}
         if({{cpuif.signal(cpuif_wr_valid.identifier)}}) begin
             case (slv_reg_wr_addr)
-            {{field_logic.get_write_demux(addr_to_reg_map, cpuif.signal("wrdata"))|indent(12)}}
+            {{field_logic.get_write_demux(addr_to_reg_map, cpuif.signal("WDATA"))|indent(12)}}
             endcase
         end
     end
@@ -91,7 +90,7 @@ module {{module_name}} (
     logic readback_done;
     logic [DATA_WIDTH-1:0] readback_data;
 
-    {{readback_mux.get_implementation(addr_to_reg_map, cpuif.signal("rddata"))|indent}}
+    {{readback_mux.get_implementation(addr_to_reg_map, cpuif.signal("RDATA"))|indent}}
     
 
     {%- call utils.AlwaysFF(cpuif_reset) %}
@@ -105,6 +104,5 @@ module {{module_name}} (
             cpuif_rd_err <= readback_err;
         end
     {%- endcall %}
-    */
 
 endmodule

@@ -142,9 +142,9 @@ class FieldLogic:
                         d_elem = ".".join(d_tokens)
 
                         if(field.get_property("singlepulse")):
-                            lines.append(f"{self._indent}{d_elem} = '0 //clear after pulse" )
+                            lines.append(f"{self._indent}{d_elem} = '0; //clear after pulse" )
                         else:
-                            lines.append(f"{self._indent}{d_elem} = {storage_elem} //retain state" )
+                            lines.append(f"{self._indent}{d_elem} = {storage_elem}; //retain state" )
             elif isinstance(child, RegfileNode):
                 self.emit_default_nextstate(lines, child)
 
@@ -171,7 +171,7 @@ class FieldLogic:
                         storage_elem = ".".join(tokens)
 
                         self._indent_level += 1
-                        lines.append(f"{self._indent}{storage_elem} = {cpuif_wr_data}[{field.high}:{field.low}]")
+                        lines.append(f"{self._indent}{storage_elem} = {cpuif_wr_data}[{field.high}:{field.low}];")
                         self._indent_level -= 1
 
                 self._indent_level -= 1

@@ -1,6 +1,4 @@
-begin
-    {%- filter indent %}
-    {%- block body %}
-    {%- endblock %}
-    {%- endfilter %}
-end
+{%- filter indent %}
+{%- block body %}
+{%- endblock %}
+{%- endfilter %}

@@ -3,16 +3,19 @@
 
 {% block body %}
 
-    enum { 
-        C_AXI_STATE_IDLE, 
-        C_AXI_STATE_DATA, 
-        C_AXI_STATE_RESP}
-    axi_wr_state, axi_rd_state;
+enum {
+    C_AXI_STATE_IDLE,
+    C_AXI_STATE_DATA,
+    C_AXI_STATE_RESP
+} axi_wr_state, axi_rd_state;
 
-    logic[31:0] slv_reg_wr_addr;
-    logic[31:0] slv_reg_rd_addr;
-    logic slv_reg_wren;
-    logic[31:0] reg_data_out;
+logic[29:0] slv_reg_wr_addr;
+logic[29:0] slv_reg_rd_addr;
+logic slv_reg_wren;
+logic[31:0] reg_data_out;
+
+assign sv_reg_wr_addr = s_axi4lite.AWADDR[31:2];
+assign sv_reg_rd_addr = s_axi4lite.ARADDR[31:2];
 
 // Request
 {%- call utils.AlwaysFF(cpuif_reset) %}

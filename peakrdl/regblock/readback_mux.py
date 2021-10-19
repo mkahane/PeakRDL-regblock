@@ -45,11 +45,14 @@ class ReadbackMux:
                             tokens[0] = "hwif_in"
                         else :
                             tokens[0] = "storage"
+
+                        tokens.append("value")
                         storage_elem = ".".join(tokens)
                         self._indent_level += 1
-                        lines.append(f"{self._indent}{rd_bus_name}[{field.high}:{field.low}] = {storage_elem}")
+                        lines.append(f"{self._indent}{rd_bus_name}[{field.high}:{field.low}] = {storage_elem};")
                         self._indent_level -= 1
 
+                lines.append(f"{self._indent}end")
                 self._indent_level -= 1
 
         lines.append(f"{self._indent}endcase")
