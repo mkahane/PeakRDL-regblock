@@ -5,23 +5,23 @@ import {{package_name}}::*;
 
 
 module {{module_name}} (
-        input wire clk,
-        {%- for signal in reset_signals %}
-        {{signal.port_declaration}},
-        {% endfor %}
+    input wire clk,
+    {%- for signal in reset_signals %}
+    {{signal.port_declaration}},
+    {% endfor %}
 
-        {%- for signal in user_signals %}
-        {{signal.port_declaration}},
-        {% endfor %}
+    {%- for signal in user_signals %}
+    {{signal.port_declaration}},
+    {% endfor %}
 
-        {%- for interrupt in interrupts %}
-        {{interrupt.port_declaration}},
-        {% endfor %}
+    {%- for interrupt in interrupts %}
+    {{interrupt.port_declaration}},
+    {% endfor %}
 
-        {{cpuif.port_declaration|indent(8)}},
+    {{cpuif.port_declaration|indent(8)}},
 
-        {{hwif.port_declaration|indent(8)}}
-    );
+    {{hwif.port_declaration|indent(8)}}
+);
 
     localparam ADDR_WIDTH = {{addr_width}};
     localparam DATA_WIDTH = {{data_width}};
@@ -42,7 +42,7 @@ module {{module_name}} (
     logic cpuif_wr_ack;
     logic cpuif_wr_err;
 
-    {{cpuif.get_implementation()|indent}}
+    {{cpuif.get_implementation()}}
 
     //--------------------------------------------------------------------------
     // Address Decode
@@ -65,7 +65,7 @@ module {{module_name}} (
 
     //Field next-state logic, and output port signal assignment (aka output mapping layer)
     {%- call utils.AlwaysFF(cpuif_reset) %}
-    if({{cpuif_reset.activehigh_identifier}}) begin
+    if({{cpuif_reset.activehigh_identifier | indent}}) begin
         {{field_logic.get_storage_reset_implementation()|indent(8)}}
     end else begin
         {{field_logic.get_storage_next_state_implementation()|indent(8)}}
