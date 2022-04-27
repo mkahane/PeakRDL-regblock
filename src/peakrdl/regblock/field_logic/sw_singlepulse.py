@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 class Singlepulse(NextStateConditional):
     comment = "singlepulse clears back to 0"
     def is_match(self, field: 'FieldNode') -> bool:
-        return field.get_property('singlepulse')
+        return (field.get_property('singlepulse') or field.get_property('multibit_singlepulse'))
 
     def get_predicate(self, field: 'FieldNode') -> str:
         # TODO: make exporter promote this to an "else"?
